@@ -4,7 +4,7 @@ This custom components provides a sensor for each Marta/Breeze card you configur
 
 ### Installation
 
-Copy this folder to `<config_dir>/custom_components/marta/`.
+Copy the marta folder to `<config_dir>/custom_components/marta/`.
 
 Required fields:
 card_number
