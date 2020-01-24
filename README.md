@@ -29,7 +29,7 @@ or add the following to your sensor.yaml file
   card_number: <Card Number>
 ```
 
-###Optional Sensor Values
+### Optional Sensor Values
 The default state of the sensor is set to the number of trips remaining in the stored value section of the card. You can change the default state to be the stored value of the card by setting the state attribute in the configuration to value.
 
 ```yaml
