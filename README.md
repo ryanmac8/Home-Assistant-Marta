@@ -2,6 +2,11 @@
 
 This custom components provides a sensor for each Marta/Breeze card you configure. It tracks the stored valued and number of trips remaining as well as any other items you purchased.
 
+[![GitHub Release][releases-shield]][releases]
+[![License][license-shield]](LICENSE.md)
+![Project Maintenance][maintenance-shield]
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+
 ### Installation
 
 Copy the marta folder to `<config_dir>/custom_components/marta/`.
