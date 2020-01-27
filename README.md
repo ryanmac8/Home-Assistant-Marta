@@ -4,7 +4,6 @@ This custom components provides a sensor for each Marta/Breeze card you configur
 
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE.md)
-![Project Maintenance][maintenance-shield]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 
 ### Installation
@@ -55,3 +54,15 @@ In addition, if you have an additional item on your Marta / Breeze card that is 
   monitored_conditions:
     - "<Special Line Item>"
 ```
+
+---
+
+Enjoy my card? Help me out for a couple of :beers: or a :coffee:!
+
+[![coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/Ryanmac8)
+
+
+[commits]: https://github.com/ryanmac8/Home-Assistant-Marta/commits/master
+[license-shield]: https://img.shields.io/github/license/ryanmac8/Home-Assistant-Marta.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/ryanmac8/Home-Assistant-Marta.svg?style=for-the-badge
+[releases]: https://github.com/ryanmac8/Home-Assistant-Marta/releases
