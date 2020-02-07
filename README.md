@@ -44,16 +44,6 @@ The default state of the sensor is set to the number of trips remaining in the s
   state: <trips or value>
 ```
 
-In addition, if you have an additional item on your Marta / Breeze card that is not under the Stored Value line but you want to monitor, you can set the monitored_conditions field to be a list of those values. You just copy the text from the item on the breeze website and input it in. For example, see below.
-
-```yaml
-# Example configuration.yaml entry
-- platform: marta
-  friendly_name: <Card Name>
-  card_number: <Card Number>
-  monitored_conditions:
-    - "<Special Line Item>"
-```
 
 ---
 

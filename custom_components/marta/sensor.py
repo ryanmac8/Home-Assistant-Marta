@@ -7,7 +7,7 @@ import re
 from bs4 import BeautifulSoup
 from datetime import timedelta
 
-from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_MONITORED_CONDITIONS,CONF_STATE)
+from homeassistant.const import (CONF_FRIENDLY_NAME,CONF_STATE)
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import Throttle
@@ -24,8 +24,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_CARDNUMBER): cv.string,
     vol.Optional(CONF_FRIENDLY_NAME): cv.string,
     vol.Optional(CONF_STATE, default="trips"): vol.In(['trips', 'value']),
-    vol.Optional(CONF_MONITORED_CONDITIONS, default=None):
-        vol.All(cv.ensure_list)
 })
 
 
@@ -33,20 +31,18 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the sensor platform."""
     cardnumber=config.get(CONF_CARDNUMBER)
     friendly_name=config.get(CONF_FRIENDLY_NAME)
-    monitor=config.get(CONF_MONITORED_CONDITIONS)
     state_type=config.get(CONF_STATE)
-    add_entities([MartaCard(cardnumber,friendly_name,monitor,state_type)])
+    add_entities([MartaCard(cardnumber,friendly_name,state_type)])
 
 
 class MartaCard(Entity):
     """Representation of a Sensor."""
 
-    def __init__(self, cardnumber, friendly_name,monitor,state_type):
+    def __init__(self, cardnumber, friendly_name,state_type):
         """Initialize the sensor."""
         self._state = None
         self._cardnumber=cardnumber
         self._friendly_name=friendly_name
-        self._monitor=monitor
         self._state_type=state_type
         self._attributes={}
 
@@ -104,6 +100,9 @@ class MartaCard(Entity):
 
         i = requests.post('https://balance.breezecard.com/breezeWeb/cardnumber_qa.do', data = data)
         root = BeautifulSoup(i.text, 'html.parser')
+
+        trip_count=0
+
         #Default Get Stored Values
         storedvalue=root.find('td', text="Stored Value : ")
         stored_value=storedvalue.find_next('td').text
@@ -112,23 +111,41 @@ class MartaCard(Entity):
         stored_trips=storedvalue.find_next('td').find_next('td').text
         if(stored_trips.isspace() or stored_trips==""):
             stored_trips=0
+        trip_count=trip_count+stored_trips
+
+        product_top_level=root.find('td', text="Remaining Rides").find_next('tr')
+        loop = 0
+        while loop == 0:
+            row = product_top_level.findAll('td')
+            if(len(row)<2):
+                product_top_level=product_top_level.find_next('tr')
+                continue
+            item_name=product_top_level.find_next('td').text
+            if(item_name=="Stored Value : "):
+                loop=1
+                break
+            item_value=product_top_level.find_next('td').find_next('td').text
+            item_trip=product_top_level.find_next('td').find_next('td').find_next('td').text
+            if(item_value.isspace() or item_value==""):
+                item_value=0
+            if(item_trip.isspace() or item_trip==""):
+                item_trip=0
+            if("Trip" in item_name):
+                trip_count=trip_count+int(item_trip)
+            if(item_value!=0 and "Trip" not in item_name):
+                item_name=item_name.replace(" ", "_").lower()
+                self._attributes[item_name+"_value"] = item_value
+            if(item_trip!=0 and "Trip" not in item_name):
+                item_name=item_name.replace(" ", "_").lower()
+                self._attributes[item_name+"_trips"] = item_trip
+            #move to next TR
+            product_top_level=product_top_level.find_next('tr')
+
         #Write Default Card Status
         if (self._state_type=="value"):
             self._state = stored_dollar_value
         if (self._state_type=="trips"):
-            self._state = stored_trips
+            self._state = trip_count
         self._attributes["card_number"]=self._cardnumber
         self._attributes["stored_value"]=stored_value
-        self._attributes["stored_trips"]=stored_trips
-
-        # For custom fields, search and post to attributes the value / trip info.
-        for monitor in self._monitor:
-            pattern = re.compile(monitor)
-            monitor=monitor.replace(" ", "_").lower()
-            storedvalue=root.find('td', text=pattern)
-            self._attributes[monitor+"_value"] = storedvalue.find_next('td').text
-            if(self._attributes[monitor+"_value"].isspace() or self._attributes[monitor+"_value"]==""):
-                self._attributes[monitor+"_value"]=0
-            self._attributes[monitor+"_trips"] = storedvalue.find_next('td').find_next('td').text
-            if(self._attributes[monitor+"_trips"].isspace() or self._attributes[monitor+"_trips"]==""):
-                self._attributes[monitor+"_trips"]=0
+        self._attributes["stored_trips"]=trip_count
